@@ -3,15 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Lion Widget v2</title>
+    <title>Lion Simple Widget</title>
     <style>
-        :root {
-            --primary-blue: #4A90E2;
-            --accent-gold: #FFC107;
-            --success-green: #4CAF50;
-            --text-dark: #444;
-        }
-
         * {
             box-sizing: border-box;
             user-select: none;
@@ -20,12 +13,12 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
             width: 100vw;
             height: 100vh;
             overflow: hidden;
+            /* 保持柔和的动态背景，避免画面过于单调 */
             background: linear-gradient(-45deg, #e0c3fc, #8ec5fc, #90f7ec, #ffecd2);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
@@ -41,231 +34,86 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* 背景装饰球 */
-        .bg-blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(35px);
-            opacity: 0.5;
-            z-index: 0;
-        }
-        .blob-1 { width: 130px; height: 130px; background: rgba(255, 152, 0, 0.4); top: 0; left: -30px; }
-        .blob-2 { width: 160px; height: 160px; background: rgba(74, 144, 226, 0.4); bottom: 0; right: -40px; }
-
-        /* --- 核心舞台 --- */
+        /* 极简舞台 */
         .stage {
             width: 100%;
             height: 100%;
-            position: relative;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 1;
+            position: relative;
+            z-index: 10;
         }
 
-        /* 狮子图片 - 增加底部留白给时间条 */
+        /* 狮子主体 - 放大展示 */
         #pet-image {
-            width: 75%;
-            max-width: 280px; /* 限制最大宽度 */
+            width: 85%; /* 更大的占比 */
+            max-width: 320px;
             height: auto;
-            max-height: 60%;
+            max-height: 80%;
             object-fit: contain;
             cursor: pointer;
             transition: transform 0.1s;
-            filter: drop-shadow(0 8px 20px rgba(0,0,0,0.12));
-            z-index: 10;
-            margin-bottom: 20px; /* 给下方时间条留出空间 */
+            filter: drop-shadow(0 10px 25px rgba(0,0,0,0.15));
         }
-        #pet-image:active { transform: scale(0.95); }
+        #pet-image:active { transform: scale(0.92); }
 
-        /* --- 组件：左上角 下一个奖励 (缩小版) --- */
-        .next-reward-widget {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            z-index: 5;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(5px);
-            border: 1px solid var(--accent-gold);
-            border-radius: 16px;
-            padding: 3px 8px 3px 3px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            pointer-events: none;
-            /* 使用固定宽度限制大小，而不是scale，防止模糊 */
-            max-width: 100px;
-        }
-
-        .nr-img-box { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
-        .nr-img-box img { width: 100%; height: 100%; object-fit: contain; }
-        .nr-text-group { display: flex; flex-direction: column; line-height: 1.1; }
-        .nr-label { font-size: 0.45rem; color: #999; font-weight: 700; letter-spacing: 0.5px; }
-        .nr-time { font-size: 0.7rem; color: var(--primary-blue); font-weight: 800; }
-
-        /* --- 组件：右上角 积分 (精致版) --- */
-        .mini-score {
-            position: absolute;
-            top: 12px; right: 12px;
-            background: rgba(255,255,255,0.8);
-            backdrop-filter: blur(5px);
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            color: var(--text-dark);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            z-index: 20;
-            pointer-events: none;
-            display: flex; align-items: center; gap: 4px;
-        }
-        .mini-score span { color: var(--primary-blue); font-size: 0.8rem; }
-
-        /* --- 组件：右侧 垂直成长条 (变窄) --- */
-        .right-panel-container {
-            position: absolute;
-            right: 8px;
-            top: 55%;
-            transform: translateY(-50%);
-            z-index: 5;
-            pointer-events: none;
-        }
-
-        .growth-sidebar {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 6px 4px;
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(4px);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-
-        .growth-icon {
-            width: 26px; height: 26px; /* 调小图标 */
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid #fff;
-            display: flex; justify-content: center; align-items: center;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .growth-icon img { width: 80%; height: 80%; object-fit: contain; }
-        .growth-icon.current { border-color: var(--accent-gold); }
-
-        .v-bar-bg {
-            width: 6px; height: 60px; /* 变细 */
-            background: rgba(255,255,255,0.4);
-            border-radius: 4px;
-            position: relative;
-        }
-        .v-bar-fill {
-            position: absolute; bottom: 0; left: 0;
-            width: 100%; height: 0%;
-            background: linear-gradient(to top, #FF9800, #FFEB3B);
-            border-radius: 4px;
-            transition: height 0.5s ease;
-        }
-
-        /* --- 新增：底部累计时间胶囊 --- */
-        .time-display-pill {
-            position: absolute;
-            bottom: 25px; /* 距离底部的位置 */
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(8px);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            color: #555;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            border: 1px solid rgba(255,255,255,0.5);
-            z-index: 15;
-            pointer-events: none;
-        }
-        .time-display-pill span {
-            font-family: monospace; /* 等宽字体防止数字跳动 */
-            font-size: 0.85rem;
-            color: var(--primary-blue);
-        }
-
-        /* --- 漂浮文字动画 --- */
+        /* --- 漂浮文字样式系统 --- */
         .floater {
             position: absolute;
-            font-weight: 900;
-            animation: floatUp 0.8s forwards;
+            font-weight: 800;
+            animation: floatUp 1.2s forwards;
             pointer-events: none;
             z-index: 100;
             white-space: nowrap;
+            text-shadow: 0 2px 4px rgba(255,255,255,0.8);
         }
+        
+        /* 点击普通奖励 */
         .floater.gain { 
-            color: var(--success-green); 
-            font-size: 1.2rem; 
-            text-shadow: 0 1px 2px rgba(255,255,255,1); 
+            color: #4CAF50; 
+            font-size: 1.4rem; 
+        }
+
+        /* 被动收益奖励 */
+        .floater.passive {
+            color: #FF9800;
+            font-size: 1.1rem;
+            animation: floatUpSlow 2s forwards; /* 慢一点 */
+        }
+
+        /* 暴击/时长奖励 */
+        .floater.bonus {
+            color: #6200EA;
+            font-size: 1.3rem;
+            background: rgba(255,255,255,0.8);
+            padding: 4px 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         
         @keyframes floatUp {
-            0% { opacity: 1; transform: translate(-50%, 0) scale(0.8); }
-            50% { transform: translate(-50%, -30px) scale(1.1); }
-            100% { opacity: 0; transform: translate(-50%, -60px) scale(1); }
+            0% { opacity: 0; transform: translate(-50%, 10px) scale(0.8); }
+            10% { opacity: 1; transform: translate(-50%, 0) scale(1.1); }
+            100% { opacity: 0; transform: translate(-50%, -80px) scale(1); }
+        }
+
+        @keyframes floatUpSlow {
+            0% { opacity: 0; transform: translate(-50%, 20px); }
+            20% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -100px); }
         }
     </style>
 </head>
 <body>
 
-    <div class="bg-blob blob-1"></div>
-    <div class="bg-blob blob-2"></div>
-
-    <!-- 右上角：积分 -->
-    <div class="mini-score">🌹 <span id="mini-score-val">0</span></div>
-
     <div class="stage">
-        
-        <!-- 左上角：目标 -->
-        <div id="next-reward-widget" class="next-reward-widget">
-            <div class="nr-img-box">
-                <img id="nr-img" src="" alt="Reward">
-            </div>
-            <div class="nr-text-group">
-                <span class="nr-label">GOAL</span>
-                <span id="nr-time" class="nr-time">--</span>
-            </div>
-        </div>
-
-        <!-- 中间：狮子 -->
+        <!-- 核心：只有狮子 -->
         <img id="pet-image" src="" alt="Lion" draggable="false" />
-
-        <!-- 底部：累计时长 (新增) -->
-        <div class="time-display-pill">
-            ⏳ <span id="total-time-text">0h 00m</span>
-        </div>
-        
-        <!-- 右侧：成长条 -->
-        <div class="right-panel-container">
-            <div class="growth-sidebar">
-                <div class="growth-icon next">
-                    <img id="next-stage-icon" src="" alt="Next">
-                </div>
-                <div class="v-bar-bg">
-                    <div id="growth-fill" class="v-bar-fill"></div>
-                </div>
-                <div class="growth-icon current">
-                    <img id="current-stage-icon" src="" alt="Current">
-                </div>
-            </div>
-        </div>
-
     </div>
 
 <script>
-// --- 数据常量 ---
+// --- 数据常量 (用于判断成长阶段显示什么图片) ---
 const LION_STAGES = [
     { minMinutes: 0, assets: { idle: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_605328cb-0397-4ae6-9d8c-81d9faa9c2cg.png", touch: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_2fa9c653-032e-4056-9edb-ba6c36f99f3g.png" } },
     { minMinutes: 60, assets: { idle: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_0932da40-1ec4-4b08-bcaf-50059a9c590g.png", touch: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_8714e8cd-a493-4910-a879-a711ce2fcffg.png" } },
@@ -273,17 +121,7 @@ const LION_STAGES = [
     { minMinutes: 4320, assets: { idle: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_599dfcf7-4217-4ade-aede-04b3bd4674dg.png", touch: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_469cadec-c139-4113-af5c-741f1c9d19dg.png" } }
 ];
 
-const ACHIEVEMENTS = [
-    { timeMin: 1,      img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_a855cdd3-3897-475f-b5d5-707171d8843g.png" },
-    { timeMin: 30,     img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_05ff92d2-cec1-48e5-9ce2-89af79bafadg.png" },
-    { timeMin: 60,     img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_a938c968-4f9d-44c8-8ecd-f668cbf292ag.png" },
-    { timeMin: 180,    img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_052e03b4-d355-4bc1-8905-f4635eeecbdg.png" },
-    { timeMin: 360,    img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_3765483f-518b-4905-a1f8-0983d97ce48g.png" },
-    { timeMin: 1440,   img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_ab4cafbd-eded-4ba3-a96b-b5f3757869ag.png" }, 
-    { timeMin: 2880,   img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_c98e167c-e338-4c70-8fe6-1c94620cab7g.png" } 
-];
-
-class WidgetGame {
+class SimpleWidget {
     constructor() {
         this.state = {
             points: 100,
@@ -291,21 +129,34 @@ class WidgetGame {
         };
         this.currentStage = 0;
         this.animTimer = null;
+        // 定义被动收益间隔 (毫秒)，这里设为60秒
+        this.PASSIVE_INTERVAL = 60000; 
     }
 
     init() {
         this.loadData();
         this.updateGrowthStage();
-        this.render(); 
         this.preloadImages();
         
+        // 确保图片加载
+        const petImg = document.getElementById('pet-image');
+        if (!petImg.src) this.setPetState('idle');
+
+        // 1. 基础计时器：计算总时长，检查成长阶段
         setInterval(() => {
             this.state.totalTimeSec++;
             this.updateGrowthStage();
-            this.renderGrowth();
-            this.renderTotalTime(); // 更新时间显示
+            // 每5秒静默保存一次
             if(this.state.totalTimeSec % 5 === 0) this.saveData();
         }, 1000);
+
+        // 2. 被动收益计时器：模拟挂机获得奖励
+        setInterval(() => {
+            this.state.points += 5;
+            this.saveData();
+            // 在狮子头顶显示提示
+            this.showToast("+5 🌹 (陪伴奖励)", null, null, 'passive');
+        }, this.PASSIVE_INTERVAL);
     }
 
     updateGrowthStage() {
@@ -320,76 +171,7 @@ class WidgetGame {
         }
     }
 
-    render() {
-        this.renderPoints();
-        this.renderGrowth();
-        this.renderTotalTime();
-        
-        const petImg = document.getElementById('pet-image');
-        if (!petImg.src) this.setPetState('idle');
-    }
-
-    renderPoints() {
-        document.getElementById('mini-score-val').innerText = this.state.points;
-    }
-
-    // 新增：渲染累计时间
-    renderTotalTime() {
-        const sec = this.state.totalTimeSec;
-        const h = Math.floor(sec / 3600);
-        const m = Math.floor((sec % 3600) / 60);
-        // 格式化为 0h 00m
-        const mStr = m < 10 ? '0' + m : m;
-        document.getElementById('total-time-text').innerText = `${h}h ${mStr}m`;
-    }
-
-    renderGrowth() {
-        const currentMins = this.state.totalTimeSec / 60;
-        const currentStageObj = LION_STAGES[this.currentStage];
-        const nextStageObj = LION_STAGES[this.currentStage + 1];
-
-        // 成长条
-        const nextIcon = document.getElementById('next-stage-icon');
-        const currentIcon = document.getElementById('current-stage-icon');
-        const fill = document.getElementById('growth-fill');
-
-        if (!nextStageObj) {
-            fill.style.height = '100%';
-            nextIcon.src = currentStageObj.assets.idle;
-            currentIcon.src = currentStageObj.assets.idle;
-        } else {
-            currentIcon.src = currentStageObj.assets.idle;
-            nextIcon.src = nextStageObj.assets.idle;
-            const startMins = currentStageObj.minMinutes;
-            const targetMins = nextStageObj.minMinutes;
-            const progress = ((currentMins - startMins) / (targetMins - startMins)) * 100;
-            fill.style.height = `${Math.min(100, Math.max(0, progress))}%`;
-        }
-
-        // 目标组件
-        const wImg = document.getElementById('nr-img');
-        const wTime = document.getElementById('nr-time');
-        
-        let allMilestones = [];
-        LION_STAGES.forEach((s, idx) => {
-            if (idx > 0) allMilestones.push({ time: s.minMinutes, src: s.assets.idle });
-        });
-        ACHIEVEMENTS.forEach(a => allMilestones.push({ time: a.timeMin, src: a.img }));
-        allMilestones.sort((a,b) => a.time - b.time);
-
-        const next = allMilestones.find(m => m.time > currentMins);
-
-        if (next) {
-            wImg.src = next.src;
-            const left = Math.ceil(next.time - currentMins);
-            // 简化显示
-            wTime.innerText = left >= 60 ? (left/60).toFixed(1) + "h" : left + "m";
-        } else {
-            wImg.src = LION_STAGES[LION_STAGES.length-1].assets.idle;
-            wTime.innerText = "MAX";
-        }
-    }
-
+    // --- 核心交互逻辑 ---
     handleTouch(e) {
         let clientX = null, clientY = null;
         if (e) {
@@ -402,12 +184,25 @@ class WidgetGame {
             }
         }
 
+        // 1. 增加积分逻辑
         this.state.points += 1;
-        this.renderPoints();
         this.saveData();
+        this.setPetState('touch', 800); // 播放触摸动画
 
-        this.setPetState('touch', 800);
-        this.showToast("+1 🌹", clientX, clientY);
+        // 2. 显示普通点击反馈
+        this.showToast("+1 🌹", clientX, clientY, 'gain');
+
+        // 3. 随机触发“爆时长”奖励 (2% 概率)
+        const bonusChance = Math.random();
+        if(bonusChance > 0.98) {
+            const bonusSec = Math.floor(Math.random() * 120) + 30; // 奖励 30-150秒
+            this.state.totalTimeSec += bonusSec;
+            
+            // 稍微延迟一点显示，错开气泡
+            setTimeout(() => {
+                this.showToast(`✨ 惊喜! 成长 +${bonusSec}秒`, null, null, 'bonus');
+            }, 300);
+        }
     }
 
     setPetState(stateKey, duration = 0) {
@@ -428,22 +223,27 @@ class WidgetGame {
         }
     }
 
-    showToast(text, x, y) {
+    // --- 漂浮文字核心 ---
+    showToast(text, x, y, type = 'gain') {
         const el = document.createElement('div');
-        el.className = 'floater gain';
+        el.className = `floater ${type}`;
         el.innerText = text;
         
         if (x !== null && y !== null) {
-            el.style.left = `${x}px`;
-            el.style.top = `${y}px`;
+            // 在点击位置附近随机偏移一点，防止完全重叠
+            const randomX = (Math.random() - 0.5) * 30;
+            el.style.left = `${x + randomX}px`;
+            el.style.top = `${y - 40}px`; // 稍微靠上一点
         } else {
+            // 居中位置 (用于被动奖励)
             el.style.left = '50%';
-            el.style.top = '45%';
+            el.style.top = '40%';
             el.style.transform = 'translate(-50%, -50%)';
         }
 
         document.body.appendChild(el);
-        setTimeout(() => el.remove(), 800);
+        // 动画结束后移除
+        setTimeout(() => el.remove(), 2000);
     }
 
     preloadImages() {
@@ -469,14 +269,14 @@ class WidgetGame {
     }
 }
 
-const widget = new WidgetGame();
+const simpleWidget = new SimpleWidget();
 window.onload = () => {
-    widget.init();
+    simpleWidget.init();
     const img = document.getElementById('pet-image');
-    img.addEventListener('mousedown', (e) => widget.handleTouch(e));
+    img.addEventListener('mousedown', (e) => simpleWidget.handleTouch(e));
     img.addEventListener('touchstart', (e) => {
         e.preventDefault(); 
-        widget.handleTouch(e);
+        simpleWidget.handleTouch(e);
     }, {passive: false});
 };
 </script>
