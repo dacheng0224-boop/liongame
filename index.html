@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Lion Widget Final</title>
+    <title>Lion Widget Final Audio</title>
     <style>
         * {
             box-sizing: border-box;
@@ -36,21 +36,21 @@
         .stage {
             width: 100%;
             height: 100%;
+            position: relative;
+            /* 确保狮子绝对居中 */
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            position: relative;
             z-index: 10;
         }
 
-        /* --- 左上角：收藏馆小组件 (修复图片变形版) --- */
+        /* --- 左上角：收藏馆小组件 --- */
         .collection-widget {
             position: absolute;
             top: 2vh; 
             left: 3vw;
+            z-index: 30; /* 保证在最上层 */
             
-            /* 字体大小适配 */
             font-size: clamp(10px, 3.5vw, 16px);
             
             background: rgba(255, 255, 255, 0.55);
@@ -65,34 +65,26 @@
             gap: 0.5em;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             pointer-events: none;
-            z-index: 20;
-            
-            /* 限制最大宽度，防止太长 */
             max-width: 50vw; 
         }
 
         .cw-icon-box {
-            /* 核心修复 1: 强制不收缩，防止被挤压 */
             flex-shrink: 0; 
-            
-            /* 核心修复 2: 强制保持正方形 */
             width: 2.2em;
             height: 2.2em;
             aspect-ratio: 1 / 1;
-            
             display: flex;
             align-items: center;
             justify-content: center;
             background: rgba(255,255,255,0.7);
             border-radius: 50%;
-            padding: 3px; /* 给内部图片留一点呼吸空间 */
+            padding: 3px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
         .cw-icon-box img {
             width: 100%;
             height: 100%;
-            /* 核心修复 3: 保持原始比例，包含在盒子内 */
             object-fit: contain; 
             display: block;
         }
@@ -101,7 +93,6 @@
             display: flex;
             flex-direction: column;
             line-height: 1.1;
-            /* 防止文字被压缩太厉害 */
             min-width: 0; 
         }
         
@@ -110,7 +101,7 @@
             color: #777;
             font-weight: 700;
             text-transform: uppercase;
-            white-space: nowrap; /* 防止换行 */
+            white-space: nowrap; 
         }
         
         .cw-value {
@@ -120,35 +111,50 @@
             white-space: nowrap;
         }
 
-        /* --- 狮子主体 --- */
+        /* --- 狮子主体 (绝对居中 + 占满宽度) --- */
         #pet-image {
-            width: 75vw;
-            max-width: 280px;
+            /* 宽度占满 */
+            width: 90vw; 
+            /* 如果在平板上，限制一下最大宽度，防止太大 */
+            max-width: 450px; 
+            
+            /* 高度自适应，但限制最大高度，防止遮挡上下组件 */
             height: auto;
-            max-height: 55vh;
+            max-height: 75vh; 
+            
             object-fit: contain;
             cursor: pointer;
             transition: transform 0.1s;
-            filter: drop-shadow(0 1vh 2vh rgba(0,0,0,0.12));
-            margin-bottom: 1.5vh;
+            filter: drop-shadow(0 1vh 3vh rgba(0,0,0,0.15));
+            
+            z-index: 10; /* 在组件下层 */
         }
-        #pet-image:active { transform: scale(0.95); }
+        #pet-image:active { transform: scale(0.96); }
 
-        /* --- 底部计时器 (精致版) --- */
+        /* --- 底部计时器 (贴底适配) --- */
         .time-pill {
+            /* 绝对定位贴底 */
+            position: absolute;
+            bottom: 4vh; 
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 30; /* 保证在狮子上面 */
+
             font-size: clamp(10px, 3.5vw, 16px);
             padding: 0.3em 0.8em;
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(6px);
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(8px);
             border-radius: 12px;
-            border: 0.5px solid rgba(255,255,255,0.5);
+            border: 0.5px solid rgba(255,255,255,0.6);
+            
             font-family: 'Courier New', Courier, monospace; 
             font-weight: 700;
             color: #555;
+            
             display: flex;
             align-items: center;
             gap: 0.4em;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             pointer-events: none;
         }
 
@@ -196,8 +202,10 @@
             </div>
         </div>
 
+        <!-- 狮子 -->
         <img id="pet-image" src="" alt="Lion" draggable="false" />
         
+        <!-- 底部贴底计时器 -->
         <div class="time-pill">
             <span>⏳</span>
             <span id="timer-text">00:00:00</span>
@@ -205,6 +213,13 @@
     </div>
 
 <script>
+// --- 内置水滴音效 (Base64) ---
+// 这是一个短促的 "Bloop" 水滴声
+const DROP_SOUND_B64 = "data:audio/wav;base64,UklGRi4AAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="; 
+// 注意：上面的Base64只是占位符，为了保证代码整洁，
+// 下面我使用 JS AudioContext 生成一个真实的水滴音效，
+// 这样您不需要加载任何外部文件，也比长 Base64 字符串更轻便。
+
 const LION_STAGES = [
     { minMinutes: 0, assets: { idle: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_605328cb-0397-4ae6-9d8c-81d9faa9c2cg.png", touch: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_2fa9c653-032e-4056-9edb-ba6c36f99f3g.png" } },
     { minMinutes: 60, assets: { idle: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_0932da40-1ec4-4b08-bcaf-50059a9c590g.png", touch: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_8714e8cd-a493-4910-a879-a711ce2fcffg.png" } },
@@ -227,6 +242,9 @@ class CompleteWidget {
         this.currentStage = 0;
         this.animTimer = null;
         this.PASSIVE_INTERVAL = 60000;
+        
+        // 音频上下文
+        this.audioCtx = null;
     }
 
     init() {
@@ -236,6 +254,12 @@ class CompleteWidget {
         this.renderTimer();
         this.renderCollection();
         
+        // 初始化音频环境 (用户交互后才能播放)
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if(AudioContext) this.audioCtx = new AudioContext();
+        } catch(e) {}
+
         const petImg = document.getElementById('pet-image');
         if (!petImg.src) this.setPetState('idle');
 
@@ -252,6 +276,34 @@ class CompleteWidget {
             this.saveData();
             this.showToast("+5 🌹", null, null, 'passive');
         }, this.PASSIVE_INTERVAL);
+    }
+
+    // --- 播放水滴音效 (合成器生成) ---
+    playDropSound() {
+        if (!this.audioCtx) return;
+        
+        // 恢复音频上下文 (有些浏览器在无操作后会挂起)
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume();
+        }
+
+        const osc = this.audioCtx.createOscillator();
+        const gainNode = this.audioCtx.createGain();
+
+        osc.connect(gainNode);
+        gainNode.connect(this.audioCtx.destination);
+
+        // 模拟水滴声：正弦波，频率快速下降
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, this.audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, this.audioCtx.currentTime + 0.15);
+
+        // 音量包络
+        gainNode.gain.setValueAtTime(0.5, this.audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 0.15);
+
+        osc.start();
+        osc.stop(this.audioCtx.currentTime + 0.15);
     }
 
     renderCollection() {
@@ -311,6 +363,9 @@ class CompleteWidget {
                 clientY = e.clientY;
             }
         }
+
+        // 播放音效
+        this.playDropSound();
 
         this.state.points += 1;
         this.saveData();
