@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Lion Simple Widget</title>
+    <title>Lion Widget Adaptive</title>
     <style>
         * {
             box-sizing: border-box;
@@ -18,14 +18,13 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            /* 保持柔和的动态背景，避免画面过于单调 */
             background: linear-gradient(-45deg, #e0c3fc, #8ec5fc, #90f7ec, #ffecd2);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         @keyframes gradientBG {
@@ -34,31 +33,54 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* 极简舞台 */
         .stage {
             width: 100%;
             height: 100%;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             position: relative;
             z-index: 10;
         }
 
-        /* 狮子主体 - 放大展示 */
         #pet-image {
-            width: 85%; /* 更大的占比 */
-            max-width: 320px;
+            width: 80%;
+            max-width: 300px;
             height: auto;
-            max-height: 80%;
+            max-height: 60%; 
             object-fit: contain;
             cursor: pointer;
             transition: transform 0.1s;
-            filter: drop-shadow(0 10px 25px rgba(0,0,0,0.15));
+            filter: drop-shadow(0 1vh 2vh rgba(0,0,0,0.12)); /* 阴影也随视口高度缩放 */
+            margin-bottom: 2vh; 
         }
-        #pet-image:active { transform: scale(0.92); }
+        #pet-image:active { transform: scale(0.95); }
 
-        /* --- 漂浮文字样式系统 --- */
+        /* --- 自适应时间胶囊 --- */
+        .time-pill {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(8px);
+            /* padding使用 em 单位，随字体缩放 */
+            padding: 0.5em 1em; 
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.6);
+            
+            /* 关键：字体大小使用 clamp 自适应 */
+            /* 最小14px，理想大小是视口宽度的5%，最大24px */
+            font-size: clamp(14px, 5vw, 24px); 
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 700;
+            color: #444;
+            
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            pointer-events: none;
+        }
+
+        /* --- 自适应漂浮提示 (重点优化) --- */
         .floater {
             position: absolute;
             font-weight: 800;
@@ -66,54 +88,56 @@
             pointer-events: none;
             z-index: 100;
             white-space: nowrap;
-            text-shadow: 0 2px 4px rgba(255,255,255,0.8);
+            text-shadow: 0 2px 4px rgba(255,255,255,0.9);
+            
+            /* 默认字体：最小16px，理想6vw，最大32px */
+            font-size: clamp(16px, 6vw, 32px);
         }
         
-        /* 点击普通奖励 */
+        /* 1. 普通点击 (+1) */
         .floater.gain { 
             color: #4CAF50; 
-            font-size: 1.4rem; 
-        }
-
-        /* 被动收益奖励 */
-        .floater.passive {
-            color: #FF9800;
-            font-size: 1.1rem;
-            animation: floatUpSlow 2s forwards; /* 慢一点 */
-        }
-
-        /* 暴击/时长奖励 */
+        } 
+        
+        /* 2. 挂机奖励 (+5) */
+        .floater.passive { 
+            color: #FF9800; 
+            font-size: clamp(14px, 5vw, 28px); /* 稍微小一点 */
+            animation-duration: 2.5s; /* 飘得慢一点 */
+        } 
+        
+        /* 3. 爆时长奖励 (高亮) */
         .floater.bonus {
             color: #6200EA;
-            font-size: 1.3rem;
-            background: rgba(255,255,255,0.8);
-            padding: 4px 10px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            /* 字体更大更醒目 */
+            font-size: clamp(18px, 7vw, 36px); 
+            background: rgba(255,255,255,0.9);
+            padding: 0.3em 0.8em;
+            border-radius: 1em;
+            box-shadow: 0 0.5em 1.5em rgba(0,0,0,0.15);
+            z-index: 101; /* 保证在最上层 */
         }
         
         @keyframes floatUp {
-            0% { opacity: 0; transform: translate(-50%, 10px) scale(0.8); }
+            0% { opacity: 0; transform: translate(-50%, 10%) scale(0.8); }
             10% { opacity: 1; transform: translate(-50%, 0) scale(1.1); }
-            100% { opacity: 0; transform: translate(-50%, -80px) scale(1); }
-        }
-
-        @keyframes floatUpSlow {
-            0% { opacity: 0; transform: translate(-50%, 20px); }
-            20% { opacity: 1; transform: translate(-50%, 0); }
-            100% { opacity: 0; transform: translate(-50%, -100px); }
+            100% { opacity: 0; transform: translate(-50%, -15vh) scale(1); } /* 上升距离基于视口高度 */
         }
     </style>
 </head>
 <body>
 
     <div class="stage">
-        <!-- 核心：只有狮子 -->
         <img id="pet-image" src="" alt="Lion" draggable="false" />
+        
+        <div class="time-pill">
+            <span>⏳</span>
+            <span id="timer-text">00:00:00</span>
+        </div>
     </div>
 
 <script>
-// --- 数据常量 (用于判断成长阶段显示什么图片) ---
+// --- 资源配置 (不变) ---
 const LION_STAGES = [
     { minMinutes: 0, assets: { idle: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_605328cb-0397-4ae6-9d8c-81d9faa9c2cg.png", touch: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_2fa9c653-032e-4056-9edb-ba6c36f99f3g.png" } },
     { minMinutes: 60, assets: { idle: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_0932da40-1ec4-4b08-bcaf-50059a9c590g.png", touch: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_8714e8cd-a493-4910-a879-a711ce2fcffg.png" } },
@@ -123,40 +147,43 @@ const LION_STAGES = [
 
 class SimpleWidget {
     constructor() {
-        this.state = {
-            points: 100,
-            totalTimeSec: 0
-        };
+        this.state = { points: 100, totalTimeSec: 0 };
         this.currentStage = 0;
         this.animTimer = null;
-        // 定义被动收益间隔 (毫秒)，这里设为60秒
-        this.PASSIVE_INTERVAL = 60000; 
+        this.PASSIVE_INTERVAL = 60000;
     }
 
     init() {
         this.loadData();
         this.updateGrowthStage();
         this.preloadImages();
+        this.renderTimer();
         
-        // 确保图片加载
         const petImg = document.getElementById('pet-image');
         if (!petImg.src) this.setPetState('idle');
 
-        // 1. 基础计时器：计算总时长，检查成长阶段
         setInterval(() => {
             this.state.totalTimeSec++;
             this.updateGrowthStage();
-            // 每5秒静默保存一次
+            this.renderTimer();
             if(this.state.totalTimeSec % 5 === 0) this.saveData();
         }, 1000);
 
-        // 2. 被动收益计时器：模拟挂机获得奖励
         setInterval(() => {
             this.state.points += 5;
             this.saveData();
-            // 在狮子头顶显示提示
-            this.showToast("+5 🌹 (陪伴奖励)", null, null, 'passive');
+            // 挂机奖励，位置固定在屏幕中央稍上方
+            this.showToast("+5 🌹", null, null, 'passive');
         }, this.PASSIVE_INTERVAL);
+    }
+
+    renderTimer() {
+        const totalSec = this.state.totalTimeSec;
+        const h = Math.floor(totalSec / 3600);
+        const m = Math.floor((totalSec % 3600) / 60);
+        const s = totalSec % 60;
+        const pad = (num) => num < 10 ? '0' + num : num;
+        document.getElementById('timer-text').innerText = `${pad(h)}:${pad(m)}:${pad(s)}`;
     }
 
     updateGrowthStage() {
@@ -171,7 +198,6 @@ class SimpleWidget {
         }
     }
 
-    // --- 核心交互逻辑 ---
     handleTouch(e) {
         let clientX = null, clientY = null;
         if (e) {
@@ -184,24 +210,23 @@ class SimpleWidget {
             }
         }
 
-        // 1. 增加积分逻辑
         this.state.points += 1;
         this.saveData();
-        this.setPetState('touch', 800); // 播放触摸动画
+        this.setPetState('touch', 800);
 
-        // 2. 显示普通点击反馈
+        // 点击奖励
         this.showToast("+1 🌹", clientX, clientY, 'gain');
 
-        // 3. 随机触发“爆时长”奖励 (2% 概率)
         const bonusChance = Math.random();
         if(bonusChance > 0.98) {
-            const bonusSec = Math.floor(Math.random() * 120) + 30; // 奖励 30-150秒
+            const bonusSec = Math.floor(Math.random() * 120) + 30;
             this.state.totalTimeSec += bonusSec;
+            this.renderTimer();
             
-            // 稍微延迟一点显示，错开气泡
+            // 爆时长奖励 (延迟一点点显示，形成连击感)
             setTimeout(() => {
-                this.showToast(`✨ 惊喜! 成长 +${bonusSec}秒`, null, null, 'bonus');
-            }, 300);
+                this.showToast(`✨ 加速 +${bonusSec}s`, null, null, 'bonus');
+            }, 200);
         }
     }
 
@@ -223,27 +248,37 @@ class SimpleWidget {
         }
     }
 
-    // --- 漂浮文字核心 ---
+    // --- 适配的核心逻辑 ---
     showToast(text, x, y, type = 'gain') {
         const el = document.createElement('div');
         el.className = `floater ${type}`;
         el.innerText = text;
         
+        // 获取视口宽度，用于计算偏移比例
+        const vw = window.innerWidth;
+        
         if (x !== null && y !== null) {
-            // 在点击位置附近随机偏移一点，防止完全重叠
-            const randomX = (Math.random() - 0.5) * 30;
-            el.style.left = `${x + randomX}px`;
-            el.style.top = `${y - 40}px`; // 稍微靠上一点
+            // 随机水平偏移：范围限制在视口宽度的 10% 以内，防止偏移过大
+            const maxOffset = vw * 0.1; 
+            const randomX = (Math.random() - 0.5) * maxOffset;
+            
+            // 边界检查：确保文字不会贴在最左或最右边缘
+            let finalX = x + randomX;
+            if (finalX < vw * 0.1) finalX = vw * 0.1; // 至少留10%左边距
+            if (finalX > vw * 0.9) finalX = vw * 0.9; // 至少留10%右边距
+
+            el.style.left = `${finalX}px`;
+            // 垂直位置稍微上移，避免手指遮挡
+            el.style.top = `${y - 50}px`; 
         } else {
-            // 居中位置 (用于被动奖励)
+            // 居中显示 (用于被动奖励或无坐标事件)
             el.style.left = '50%';
-            el.style.top = '40%';
+            el.style.top = '45%'; // 狮子头部附近
             el.style.transform = 'translate(-50%, -50%)';
         }
 
         document.body.appendChild(el);
-        // 动画结束后移除
-        setTimeout(() => el.remove(), 2000);
+        setTimeout(() => el.remove(), type === 'passive' ? 2500 : 1200);
     }
 
     preloadImages() {
