@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Lion Adaptive Widget</title>
+    <title>Lion Widget Complete</title>
     <style>
         * {
             box-sizing: border-box;
@@ -24,7 +24,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 默认字体基准 */
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
@@ -45,49 +44,105 @@
             z-index: 10;
         }
 
-        /* 狮子：宽度基于视口宽度，但限制最大值 */
-        #pet-image {
-            width: 80vw;
-            max-width: 300px; /* 大屏限制 */
-            height: auto;
-            max-height: 60vh;
-            object-fit: contain;
-            cursor: pointer;
-            transition: transform 0.1s;
-            /* 阴影随视口高度缩放 */
-            filter: drop-shadow(0 1vh 2vh rgba(0,0,0,0.15));
-            /* 底部间距随视口高度缩放 */
-            margin-bottom: 2vh;
-        }
-        #pet-image:active { transform: scale(0.95); }
-
-        /* --- 底部计时器 (完全宽度适配) --- */
-        .time-pill {
-            /* 核心适配：最小12px，首选宽度4.5%，最大22px */
-            font-size: clamp(12px, 4.5vw, 22px);
+        /* --- 左上角：收藏馆小组件 (新增) --- */
+        .collection-widget {
+            position: absolute;
+            /* 距离顶部和左侧的距离，随视口缩放 */
+            top: 2vh; 
+            left: 3vw;
             
-            /* padding 使用 em，随字体大小自动伸缩 */
-            padding: 0.6em 1.2em;
+            /* 字体大小基准：适配的关键 */
+            /* 最小10px，正常3.5vw，最大16px */
+            font-size: clamp(10px, 3.5vw, 16px);
             
-            background: rgba(255, 255, 255, 0.55);
-            backdrop-filter: blur(8px);
-            border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.6);
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(5px);
+            border: 0.5px solid rgba(255,255,255,0.6);
+            border-radius: 12px;
             
-            /* 等宽字体防止数字跳动 */
-            font-family: 'Courier New', Courier, monospace; 
-            font-weight: 700;
-            color: #444;
+            /* 内边距随字体大小缩放 */
+            padding: 0.4em 0.8em 0.4em 0.4em; 
             
             display: flex;
             align-items: center;
-            gap: 0.6em; /* 图标和文字间距也随字体缩放 */
-            box-shadow: 0 0.5vh 2vh rgba(0,0,0,0.05);
-            pointer-events: none;
-            white-space: nowrap;
+            gap: 0.5em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            pointer-events: none; /* 纯展示，不阻挡点击 */
+            z-index: 20;
+            
+            /* 限制最大宽度，防止文字过长 */
+            max-width: 45vw;
         }
 
-        /* --- 漂浮提示 (完全宽度适配) --- */
+        .cw-icon-box {
+            /* 图标大小随字体缩放，约等于2.2倍字体大小 */
+            width: 2.2em;
+            height: 2.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.6);
+            border-radius: 50%;
+            padding: 2px;
+        }
+        .cw-icon-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .cw-info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+        
+        .cw-label {
+            font-size: 0.7em; /* 比基准字体小 */
+            color: #666;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .cw-value {
+            font-size: 1.1em; /* 比基准字体大 */
+            color: #6200EA; /* 紫色高亮 */
+            font-weight: 800;
+        }
+
+        /* --- 狮子主体 --- */
+        #pet-image {
+            width: 75vw;
+            max-width: 280px;
+            height: auto;
+            max-height: 55vh; /* 稍微减小高度，防止遮挡上方组件 */
+            object-fit: contain;
+            cursor: pointer;
+            transition: transform 0.1s;
+            filter: drop-shadow(0 1vh 2vh rgba(0,0,0,0.12));
+            margin-bottom: 1.5vh;
+        }
+        #pet-image:active { transform: scale(0.95); }
+
+        /* --- 底部计时器 --- */
+        .time-pill {
+            font-size: clamp(10px, 3.5vw, 16px);
+            padding: 0.3em 0.8em;
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(6px);
+            border-radius: 12px;
+            border: 0.5px solid rgba(255,255,255,0.5);
+            font-family: 'Courier New', Courier, monospace; 
+            font-weight: 700;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 0.4em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            pointer-events: none;
+        }
+
+        /* --- 漂浮提示 --- */
         .floater {
             position: absolute;
             font-weight: 800;
@@ -95,46 +150,42 @@
             pointer-events: none;
             z-index: 100;
             white-space: nowrap;
-            text-shadow: 0 2px 4px rgba(255,255,255,0.9);
-            
-            /* 提示文字适配：最小14px，首选5.5%，最大30px */
-            font-size: clamp(14px, 5.5vw, 30px);
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+            font-size: clamp(12px, 4.5vw, 20px);
         }
-        
-        /* 1. 普通互动 (+1) */
-        .floater.gain { 
-            color: #4CAF50; 
-        } 
-        
-        /* 2. 停留奖励 (+5) - 稍微大一点点 */
-        .floater.passive { 
-            color: #FF9800; 
-            font-size: clamp(15px, 6vw, 32px);
-            animation-duration: 2s; /* 飘得慢一点 */
-        } 
-        
-        /* 3. 爆时长奖励 - 最醒目 */
+        .floater.gain { color: #4CAF50; } 
+        .floater.passive { color: #FF9800; font-size: clamp(13px, 5vw, 22px); animation-duration: 2s; } 
         .floater.bonus {
             color: #6200EA;
-            font-size: clamp(16px, 6.5vw, 36px);
-            background: rgba(255,255,255,0.9);
-            /* 内边距也随字体自适应 */
-            padding: 0.4em 1em;
-            border-radius: 2em;
-            box-shadow: 0 0.5em 1.5em rgba(0,0,0,0.15);
+            font-size: clamp(13px, 5vw, 22px);
+            background: rgba(255,255,255,0.85);
+            padding: 0.25em 0.7em;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        /* 动画位移也基于视口高度 (vh) */
         @keyframes floatUp {
-            0% { opacity: 0; transform: translate(-50%, 10%) scale(0.8); }
-            10% { opacity: 1; transform: translate(-50%, 0) scale(1.1); }
-            100% { opacity: 0; transform: translate(-50%, -12vh) scale(1); }
+            0% { opacity: 0; transform: translate(-50%, 10%) scale(0.9); }
+            15% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -10vh) scale(1); }
         }
     </style>
 </head>
 <body>
 
     <div class="stage">
+        
+        <!-- 左上角：收藏馆/目标组件 -->
+        <div class="collection-widget" id="collection-widget">
+            <div class="cw-icon-box">
+                <img id="cw-img" src="" alt="Goal">
+            </div>
+            <div class="cw-info">
+                <span class="cw-label">NEXT</span>
+                <span class="cw-value" id="cw-time">--m</span>
+            </div>
+        </div>
+
         <img id="pet-image" src="" alt="Lion" draggable="false" />
         
         <div class="time-pill">
@@ -144,7 +195,7 @@
     </div>
 
 <script>
-// --- 资源配置 ---
+// --- 数据常量 ---
 const LION_STAGES = [
     { minMinutes: 0, assets: { idle: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_605328cb-0397-4ae6-9d8c-81d9faa9c2cg.png", touch: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_2fa9c653-032e-4056-9edb-ba6c36f99f3g.png" } },
     { minMinutes: 60, assets: { idle: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_0932da40-1ec4-4b08-bcaf-50059a9c590g.png", touch: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_8714e8cd-a493-4910-a879-a711ce2fcffg.png" } },
@@ -152,12 +203,22 @@ const LION_STAGES = [
     { minMinutes: 4320, assets: { idle: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_599dfcf7-4217-4ade-aede-04b3bd4674dg.png", touch: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_469cadec-c139-4113-af5c-741f1c9d19dg.png" } }
 ];
 
-class AdaptiveWidget {
+// 奖励列表：相框、车、徽章
+const ACHIEVEMENTS = [
+    { timeMin: 30,     img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_05ff92d2-cec1-48e5-9ce2-89af79bafadg.png" }, // 星星框
+    { timeMin: 60,     img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_a938c968-4f9d-44c8-8ecd-f668cbf292ag.png" }, // 金框
+    { timeMin: 180,    img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_052e03b4-d355-4bc1-8905-f4635eeecbdg.png" }, // 红车
+    { timeMin: 360,    img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_3765483f-518b-4905-a1f8-0983d97ce48g.png" }, // 蓝车
+    { timeMin: 1440,   img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_ab4cafbd-eded-4ba3-a96b-b5f3757869ag.png" }, // 超跑
+    { timeMin: 2880,   img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_c98e167c-e338-4c70-8fe6-1c94620cab7g.png" }  // 勋章
+];
+
+class CompleteWidget {
     constructor() {
         this.state = { points: 100, totalTimeSec: 0 };
         this.currentStage = 0;
         this.animTimer = null;
-        this.PASSIVE_INTERVAL = 60000; // 60秒触发一次停留奖励
+        this.PASSIVE_INTERVAL = 60000;
     }
 
     init() {
@@ -165,25 +226,68 @@ class AdaptiveWidget {
         this.updateGrowthStage();
         this.preloadImages();
         this.renderTimer();
+        this.renderCollection(); // 渲染左上角组件
         
         const petImg = document.getElementById('pet-image');
         if (!petImg.src) this.setPetState('idle');
 
-        // 计时器逻辑
         setInterval(() => {
             this.state.totalTimeSec++;
             this.updateGrowthStage();
             this.renderTimer();
+            this.renderCollection(); // 实时更新目标时间
             if(this.state.totalTimeSec % 5 === 0) this.saveData();
         }, 1000);
 
-        // 停留奖励逻辑
         setInterval(() => {
             this.state.points += 5;
             this.saveData();
-            // 在屏幕中心上方触发提示
-            this.showToast("+5 🌹 (Stay Bonus)", null, null, 'passive');
+            this.showToast("+5 🌹", null, null, 'passive');
         }, this.PASSIVE_INTERVAL);
+    }
+
+    // --- 渲染左上角收藏馆组件 ---
+    renderCollection() {
+        const currentMins = this.state.totalTimeSec / 60;
+        
+        // 1. 合并所有里程碑（进化阶段 + 道具）
+        let allMilestones = [];
+        // 从第2个阶段开始算里程碑 (第1个是初始状态)
+        LION_STAGES.forEach((s, idx) => {
+            if (idx > 0) allMilestones.push({ time: s.minMinutes, src: s.assets.idle });
+        });
+        // 加入道具奖励
+        ACHIEVEMENTS.forEach(a => allMilestones.push({ time: a.timeMin, src: a.img }));
+        
+        // 按时间排序
+        allMilestones.sort((a,b) => a.time - b.time);
+
+        // 2. 找到下一个未达成的目标
+        const next = allMilestones.find(m => m.time > currentMins);
+        
+        const imgEl = document.getElementById('cw-img');
+        const timeEl = document.getElementById('cw-time');
+
+        if (next) {
+            // 显示目标图标
+            const path = next.src;
+            // 避免重复赋值引起闪烁
+            if(!imgEl.src.includes(path)) imgEl.src = path;
+
+            // 计算剩余时间
+            const leftMin = Math.ceil(next.time - currentMins);
+            if (leftMin >= 60) {
+                timeEl.innerText = (leftMin / 60).toFixed(1) + "h";
+            } else {
+                timeEl.innerText = leftMin + "m";
+            }
+        } else {
+            // 已满级
+            if(!imgEl.src.includes(LION_STAGES[LION_STAGES.length-1].assets.idle)) {
+                imgEl.src = LION_STAGES[LION_STAGES.length-1].assets.idle;
+            }
+            timeEl.innerText = "MAX";
+        }
     }
 
     renderTimer() {
@@ -223,17 +327,15 @@ class AdaptiveWidget {
         this.saveData();
         this.setPetState('touch', 800);
 
-        // 1. 普通点击提示
         this.showToast("+1 🌹", clientX, clientY, 'gain');
 
-        // 2. 爆时长奖励 (2% 概率)
         const bonusChance = Math.random();
         if(bonusChance > 0.98) {
             const bonusSec = Math.floor(Math.random() * 120) + 30;
             this.state.totalTimeSec += bonusSec;
             this.renderTimer();
+            this.renderCollection(); // 时间增加可能触发目标更新
             
-            // 延迟一点显示，让用户先看到+1，再看到大奖
             setTimeout(() => {
                 this.showToast(`✨ Speed Up +${bonusSec}s`, null, null, 'bonus');
             }, 250);
@@ -258,32 +360,26 @@ class AdaptiveWidget {
         }
     }
 
-    // --- 适配的核心显示逻辑 ---
     showToast(text, x, y, type = 'gain') {
         const el = document.createElement('div');
         el.className = `floater ${type}`;
         el.innerText = text;
         
-        // 获取视口宽度，用于计算偏移比例
         const vw = window.innerWidth;
         
         if (x !== null && y !== null) {
-            // 在点击位置显示
-            // 随机水平偏移：范围限制在视口宽度的 5% 以内
             const maxOffset = vw * 0.05; 
             const randomX = (Math.random() - 0.5) * maxOffset;
             
-            // 边界保护：确保文字不贴边
             let finalX = x + randomX;
-            if (finalX < vw * 0.15) finalX = vw * 0.15; 
-            if (finalX > vw * 0.85) finalX = vw * 0.85; 
+            if (finalX < vw * 0.1) finalX = vw * 0.1; 
+            if (finalX > vw * 0.9) finalX = vw * 0.9; 
 
             el.style.left = `${finalX}px`;
             el.style.top = `${y - 40}px`; 
         } else {
-            // 居中显示 (用于停留奖励)
             el.style.left = '50%';
-            el.style.top = '45%'; 
+            el.style.top = '40%'; 
             el.style.transform = 'translate(-50%, -50%)';
         }
 
@@ -296,6 +392,7 @@ class AdaptiveWidget {
             if(stage.assets.idle) (new Image()).src = stage.assets.idle;
             if(stage.assets.touch) (new Image()).src = stage.assets.touch;
         });
+        ACHIEVEMENTS.forEach(a => (new Image()).src = a.img);
     }
 
     saveData() {
@@ -314,7 +411,7 @@ class AdaptiveWidget {
     }
 }
 
-const widget = new AdaptiveWidget();
+const widget = new CompleteWidget();
 window.onload = () => {
     widget.init();
     const img = document.getElementById('pet-image');
