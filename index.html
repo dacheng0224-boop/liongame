@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Lion Widget Complete</title>
+    <title>Lion Widget Final</title>
     <style>
         * {
             box-sizing: border-box;
@@ -44,70 +44,80 @@
             z-index: 10;
         }
 
-        /* --- 左上角：收藏馆小组件 (新增) --- */
+        /* --- 左上角：收藏馆小组件 (修复图片变形版) --- */
         .collection-widget {
             position: absolute;
-            /* 距离顶部和左侧的距离，随视口缩放 */
             top: 2vh; 
             left: 3vw;
             
-            /* 字体大小基准：适配的关键 */
-            /* 最小10px，正常3.5vw，最大16px */
+            /* 字体大小适配 */
             font-size: clamp(10px, 3.5vw, 16px);
             
-            background: rgba(255, 255, 255, 0.45);
-            backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(6px);
             border: 0.5px solid rgba(255,255,255,0.6);
             border-radius: 12px;
             
-            /* 内边距随字体大小缩放 */
-            padding: 0.4em 0.8em 0.4em 0.4em; 
+            padding: 0.35em 0.8em 0.35em 0.35em; 
             
             display: flex;
             align-items: center;
             gap: 0.5em;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            pointer-events: none; /* 纯展示，不阻挡点击 */
+            pointer-events: none;
             z-index: 20;
             
-            /* 限制最大宽度，防止文字过长 */
-            max-width: 45vw;
+            /* 限制最大宽度，防止太长 */
+            max-width: 50vw; 
         }
 
         .cw-icon-box {
-            /* 图标大小随字体缩放，约等于2.2倍字体大小 */
+            /* 核心修复 1: 强制不收缩，防止被挤压 */
+            flex-shrink: 0; 
+            
+            /* 核心修复 2: 强制保持正方形 */
             width: 2.2em;
             height: 2.2em;
+            aspect-ratio: 1 / 1;
+            
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.7);
             border-radius: 50%;
-            padding: 2px;
+            padding: 3px; /* 给内部图片留一点呼吸空间 */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
+        
         .cw-icon-box img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            /* 核心修复 3: 保持原始比例，包含在盒子内 */
+            object-fit: contain; 
+            display: block;
         }
 
         .cw-info {
             display: flex;
             flex-direction: column;
             line-height: 1.1;
+            /* 防止文字被压缩太厉害 */
+            min-width: 0; 
         }
         
         .cw-label {
-            font-size: 0.7em; /* 比基准字体小 */
-            color: #666;
+            font-size: 0.75em;
+            color: #777;
             font-weight: 700;
             text-transform: uppercase;
+            white-space: nowrap; /* 防止换行 */
         }
         
         .cw-value {
-            font-size: 1.1em; /* 比基准字体大 */
-            color: #6200EA; /* 紫色高亮 */
+            font-size: 1.1em;
+            color: #6200EA;
             font-weight: 800;
+            white-space: nowrap;
         }
 
         /* --- 狮子主体 --- */
@@ -115,7 +125,7 @@
             width: 75vw;
             max-width: 280px;
             height: auto;
-            max-height: 55vh; /* 稍微减小高度，防止遮挡上方组件 */
+            max-height: 55vh;
             object-fit: contain;
             cursor: pointer;
             transition: transform 0.1s;
@@ -124,11 +134,11 @@
         }
         #pet-image:active { transform: scale(0.95); }
 
-        /* --- 底部计时器 --- */
+        /* --- 底部计时器 (精致版) --- */
         .time-pill {
             font-size: clamp(10px, 3.5vw, 16px);
             padding: 0.3em 0.8em;
-            background: rgba(255, 255, 255, 0.45);
+            background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(6px);
             border-radius: 12px;
             border: 0.5px solid rgba(255,255,255,0.5);
@@ -158,7 +168,7 @@
         .floater.bonus {
             color: #6200EA;
             font-size: clamp(13px, 5vw, 22px);
-            background: rgba(255,255,255,0.85);
+            background: rgba(255,255,255,0.9);
             padding: 0.25em 0.7em;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -175,8 +185,8 @@
 
     <div class="stage">
         
-        <!-- 左上角：收藏馆/目标组件 -->
-        <div class="collection-widget" id="collection-widget">
+        <!-- 左上角组件 -->
+        <div class="collection-widget">
             <div class="cw-icon-box">
                 <img id="cw-img" src="" alt="Goal">
             </div>
@@ -195,7 +205,6 @@
     </div>
 
 <script>
-// --- 数据常量 ---
 const LION_STAGES = [
     { minMinutes: 0, assets: { idle: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_605328cb-0397-4ae6-9d8c-81d9faa9c2cg.png", touch: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_2fa9c653-032e-4056-9edb-ba6c36f99f3g.png" } },
     { minMinutes: 60, assets: { idle: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_0932da40-1ec4-4b08-bcaf-50059a9c590g.png", touch: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_8714e8cd-a493-4910-a879-a711ce2fcffg.png" } },
@@ -203,14 +212,13 @@ const LION_STAGES = [
     { minMinutes: 4320, assets: { idle: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_599dfcf7-4217-4ade-aede-04b3bd4674dg.png", touch: "https://cos-cdn.kk6277.com/feishu/img_v3_02tt_469cadec-c139-4113-af5c-741f1c9d19dg.png" } }
 ];
 
-// 奖励列表：相框、车、徽章
 const ACHIEVEMENTS = [
-    { timeMin: 30,     img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_05ff92d2-cec1-48e5-9ce2-89af79bafadg.png" }, // 星星框
-    { timeMin: 60,     img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_a938c968-4f9d-44c8-8ecd-f668cbf292ag.png" }, // 金框
-    { timeMin: 180,    img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_052e03b4-d355-4bc1-8905-f4635eeecbdg.png" }, // 红车
-    { timeMin: 360,    img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_3765483f-518b-4905-a1f8-0983d97ce48g.png" }, // 蓝车
-    { timeMin: 1440,   img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_ab4cafbd-eded-4ba3-a96b-b5f3757869ag.png" }, // 超跑
-    { timeMin: 2880,   img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_c98e167c-e338-4c70-8fe6-1c94620cab7g.png" }  // 勋章
+    { timeMin: 30,     img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_05ff92d2-cec1-48e5-9ce2-89af79bafadg.png" },
+    { timeMin: 60,     img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_a938c968-4f9d-44c8-8ecd-f668cbf292ag.png" },
+    { timeMin: 180,    img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_052e03b4-d355-4bc1-8905-f4635eeecbdg.png" },
+    { timeMin: 360,    img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_3765483f-518b-4905-a1f8-0983d97ce48g.png" },
+    { timeMin: 1440,   img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_ab4cafbd-eded-4ba3-a96b-b5f3757869ag.png" },
+    { timeMin: 2880,   img: "https://cos-cdn.kk6277.com/feishu/img_v3_02tc_c98e167c-e338-4c70-8fe6-1c94620cab7g.png" }
 ];
 
 class CompleteWidget {
@@ -226,7 +234,7 @@ class CompleteWidget {
         this.updateGrowthStage();
         this.preloadImages();
         this.renderTimer();
-        this.renderCollection(); // 渲染左上角组件
+        this.renderCollection();
         
         const petImg = document.getElementById('pet-image');
         if (!petImg.src) this.setPetState('idle');
@@ -235,7 +243,7 @@ class CompleteWidget {
             this.state.totalTimeSec++;
             this.updateGrowthStage();
             this.renderTimer();
-            this.renderCollection(); // 实时更新目标时间
+            this.renderCollection();
             if(this.state.totalTimeSec % 5 === 0) this.saveData();
         }, 1000);
 
@@ -246,43 +254,24 @@ class CompleteWidget {
         }, this.PASSIVE_INTERVAL);
     }
 
-    // --- 渲染左上角收藏馆组件 ---
     renderCollection() {
         const currentMins = this.state.totalTimeSec / 60;
-        
-        // 1. 合并所有里程碑（进化阶段 + 道具）
         let allMilestones = [];
-        // 从第2个阶段开始算里程碑 (第1个是初始状态)
         LION_STAGES.forEach((s, idx) => {
             if (idx > 0) allMilestones.push({ time: s.minMinutes, src: s.assets.idle });
         });
-        // 加入道具奖励
         ACHIEVEMENTS.forEach(a => allMilestones.push({ time: a.timeMin, src: a.img }));
-        
-        // 按时间排序
         allMilestones.sort((a,b) => a.time - b.time);
 
-        // 2. 找到下一个未达成的目标
         const next = allMilestones.find(m => m.time > currentMins);
-        
         const imgEl = document.getElementById('cw-img');
         const timeEl = document.getElementById('cw-time');
 
         if (next) {
-            // 显示目标图标
-            const path = next.src;
-            // 避免重复赋值引起闪烁
-            if(!imgEl.src.includes(path)) imgEl.src = path;
-
-            // 计算剩余时间
+            if(!imgEl.src.includes(next.src)) imgEl.src = next.src;
             const leftMin = Math.ceil(next.time - currentMins);
-            if (leftMin >= 60) {
-                timeEl.innerText = (leftMin / 60).toFixed(1) + "h";
-            } else {
-                timeEl.innerText = leftMin + "m";
-            }
+            timeEl.innerText = leftMin >= 60 ? (leftMin / 60).toFixed(1) + "h" : leftMin + "m";
         } else {
-            // 已满级
             if(!imgEl.src.includes(LION_STAGES[LION_STAGES.length-1].assets.idle)) {
                 imgEl.src = LION_STAGES[LION_STAGES.length-1].assets.idle;
             }
@@ -326,7 +315,6 @@ class CompleteWidget {
         this.state.points += 1;
         this.saveData();
         this.setPetState('touch', 800);
-
         this.showToast("+1 🌹", clientX, clientY, 'gain');
 
         const bonusChance = Math.random();
@@ -334,8 +322,7 @@ class CompleteWidget {
             const bonusSec = Math.floor(Math.random() * 120) + 30;
             this.state.totalTimeSec += bonusSec;
             this.renderTimer();
-            this.renderCollection(); // 时间增加可能触发目标更新
-            
+            this.renderCollection();
             setTimeout(() => {
                 this.showToast(`✨ Speed Up +${bonusSec}s`, null, null, 'bonus');
             }, 250);
@@ -366,15 +353,12 @@ class CompleteWidget {
         el.innerText = text;
         
         const vw = window.innerWidth;
-        
         if (x !== null && y !== null) {
             const maxOffset = vw * 0.05; 
             const randomX = (Math.random() - 0.5) * maxOffset;
-            
             let finalX = x + randomX;
             if (finalX < vw * 0.1) finalX = vw * 0.1; 
             if (finalX > vw * 0.9) finalX = vw * 0.9; 
-
             el.style.left = `${finalX}px`;
             el.style.top = `${y - 40}px`; 
         } else {
@@ -382,7 +366,6 @@ class CompleteWidget {
             el.style.top = '40%'; 
             el.style.transform = 'translate(-50%, -50%)';
         }
-
         document.body.appendChild(el);
         setTimeout(() => el.remove(), type === 'passive' ? 2000 : 1200);
     }
